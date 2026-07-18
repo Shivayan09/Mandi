@@ -105,7 +105,7 @@ export default function ProductDetailsPage() {
             </div>
           </div>
 
-          <section className="border-t border-black/10 pt-6">
+          <section className="border-t border-black/10 pt-5">
             <p className="text-[0.65rem] uppercase tracking-[0.34em] text-black/55">
               Description
             </p>
@@ -124,13 +124,16 @@ export default function ProductDetailsPage() {
             </div>
           </section>
 
-          <section className="border-t border-black/10 pt-6">
+          <section className="border-t border-black/10 pt-5">
             <p className="text-[0.65rem] uppercase tracking-[0.34em] text-black/55">
               Key details
             </p>
-            <div className="mt-4 divide-y divide-black/10">
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {product.specs.map((spec) => (
-                <div key={spec.label} className="flex items-center justify-between py-4">
+                <div
+                  key={spec.label}
+                  className="flex items-center justify-between border-b border-black/10 py-3"
+                >
                   <span className="text-sm text-black/55">{spec.label}</span>
                   <span className="text-sm font-medium text-black">{spec.value}</span>
                 </div>
@@ -138,14 +141,14 @@ export default function ProductDetailsPage() {
             </div>
           </section>
 
-          <section className="border-t border-black/10 pt-6">
+          <section className="border-t border-black/10 pt-5">
             <p className="text-[0.65rem] uppercase tracking-[0.34em] text-black/55">
               More listings like this
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-black">
               Similar items from the same category
             </h2>
-            <div className="mt-8 grid gap-10 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {relatedProducts.map((item) => (
                 <ProductCard key={item.slug} product={item} />
               ))}
@@ -153,7 +156,7 @@ export default function ProductDetailsPage() {
           </section>
         </div>
 
-        <aside className="space-y-8 lg:sticky lg:top-6 lg:self-start">
+        <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
           <div className="rounded-4xl border border-black/10 bg-black p-6 text-white">
             <p className="text-[0.65rem] uppercase tracking-[0.34em] text-white/55">
               Product summary
@@ -165,7 +168,7 @@ export default function ProductDetailsPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/auth/login"
-                className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-black/90 hover:text-white"
+                className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/80"
               >
                 Proceed to buy
               </Link>
@@ -224,6 +227,55 @@ export default function ProductDetailsPage() {
               Meet in public, inspect the listing in person, and only proceed when the condition
               matches the photos and description.
             </p>
+          </div>
+
+          <div className="overflow-hidden rounded-4xl border border-black/10 bg-white">
+            <div className="border-b border-black/10 p-6">
+              <p className="text-[0.65rem] uppercase tracking-[0.34em] text-black/55">
+                Seller location
+              </p>
+              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-black">
+                Approximate meetup area
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-black/70">
+                Dummy location preview for now. Confirm the exact meetup point with the seller
+                before you travel.
+              </p>
+            </div>
+            <div className="relative h-72 overflow-hidden bg-[#f4f1ea]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.9),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(17,17,17,0.05),transparent_34%)]" />
+              <div className="absolute inset-0 opacity-60 bg-[linear-gradient(rgba(17,17,17,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(17,17,17,0.06)_1px,transparent_1px)] bg-size-[40px_40px]" />
+
+              <div className="absolute inset-x-6 top-8 h-px bg-black/8" />
+              <div className="absolute inset-x-6 top-20 h-px bg-black/8" />
+              <div className="absolute inset-x-6 top-32 h-px bg-black/8" />
+              <div className="absolute inset-x-6 top-44 h-px bg-black/8" />
+              <div className="absolute inset-x-6 top-56 h-px bg-black/8" />
+              <div className="absolute inset-y-6 left-10 w-px bg-black/8" />
+              <div className="absolute inset-y-6 left-24 w-px bg-black/8" />
+              <div className="absolute inset-y-6 left-40 w-px bg-black/8" />
+              <div className="absolute inset-y-6 left-56 w-px bg-black/8" />
+
+              <div className="absolute left-[18%] top-[22%] h-[56%] w-[26%] rounded-full border border-black/10 bg-black/5 blur-[0.3px]" />
+              <div className="absolute left-[42%] top-[36%] h-[18%] w-[30%] rotate-[-7deg] rounded-full border border-black/10 bg-white/40" />
+
+              <div className="absolute left-[56%] top-[48%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+                <div className="relative">
+                  <div className="h-9 w-9 rounded-full border-4 border-white bg-black shadow-[0_10px_24px_rgba(17,17,17,0.16)]" />
+                  <div className="absolute left-1/2 top-9 h-9 w-px -translate-x-1/2 bg-black/25" />
+                </div>
+                <div className="mt-9 rounded-full border border-black/10 bg-white px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-black shadow-[0_8px_20px_rgba(17,17,17,0.05)]">
+                  {product.location}
+                </div>
+              </div>
+
+              <div className="absolute right-4 top-4 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[0.62rem] font-medium uppercase tracking-[0.24em] text-black/55 backdrop-blur">
+                Approximate area
+              </div>
+              <div className="absolute bottom-4 left-4 rounded-full border border-black/10 bg-white/90 px-4 py-2 text-xs font-medium text-black/70 backdrop-blur">
+                Dummy map preview
+              </div>
+            </div>
           </div>
         </aside>
       </section>

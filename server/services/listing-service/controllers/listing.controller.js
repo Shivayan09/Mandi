@@ -35,6 +35,13 @@ export const createListing = async (req, res) => {
             listing,
         });
     } catch (error) {
+        if (error.name === "ValidationError") {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                message: errors[0]
+            });
+        }
         return res.status(500).json({
             success: false,
             message: "Failed to create listing!",
