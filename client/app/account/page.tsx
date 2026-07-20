@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { InfoPill, SectionHeading, StatCard, Surface } from "@/app/components/marketplace";
+import { InfoPill, SectionHeading, StatCard, Surface } from "@/components/marketplace";
 import { useAppContext } from "@/context/AppContext";
 
 export default function AccountPage() {
@@ -53,35 +53,28 @@ export default function AccountPage() {
         <Surface className="overflow-hidden">
           <div className="border-b border-black/10 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.95),transparent_35%),radial-gradient(circle_at_top_right,rgba(0,0,0,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8f6f2_100%)] p-6 sm:p-8 lg:p-10">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <p className="text-[0.65rem] uppercase tracking-[0.34em] text-black/55">
-                  Account
-                </p>
-                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
-                  {user.name}
-                </h1>
-                <p className="mt-4 text-sm leading-6 text-black/70 sm:text-base">
-                  Manage your profile, review your verification status, and jump back into the
-                  marketplace from one place.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
+              <div className="flex gap-5 items-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-[1.4rem] border border-black/10 bg-black text-lg font-semibold text-white shadow-[0_12px_30px_rgba(17,17,17,0.12)]">
                   {initials}
                 </div>
+                <div className="flex flex-col">
+                  <p className="text-[0.65rem] uppercase tracking-[0.34em] text-black/55">
+                    Account
+                  </p>
+                  <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
+                    {user.name}
+                  </h1>
+
+                </div>
+
+              </div>
+
+              <div className="flex items-center gap-4">
+
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-2">
                     <InfoPill label="Email" value={user.email} />
                     <InfoPill label="Phone" value={user.phoneNumber || "Not added"} />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-medium text-black/70">
-                      {authLabel}
-                    </span>
-                    <span className="rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-medium text-black/70">
-                      {verificationLabel}
-                    </span>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import Listing from "../models/listing.js";
 import uploadImage from "../utils/uploadImage.js";
 import cloudinary from "../config/cloudinary.js";
+import { CATEGORIES } from "../config/categories.js";
 
 export const createListing = async (req, res) => {
     try {
@@ -27,6 +28,12 @@ export const createListing = async (req, res) => {
                 public_id: uploaded.public_id,
             });
 
+        }
+        if (!CATEGORIES.includes(category)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category!",
+            });
         }
         const listing = await Listing.create({ userId, title, description, category, subCategory, brand, condition, price, negotiable, images: uploadedImages, location, tags, expiresAt, });
         return res.status(201).json({
@@ -137,7 +144,22 @@ export const updateListing = async (req, res) => {
                 message: "You are not authorized to update this listing!",
             });
         }
-        const updatedListing = await Listing.findByIdAndUpdate(listingId, req.body, { new: true, runValidators: true });
+        const updates = { ...req.body };
+        if (typeof updates.location === "string") {
+            updates.location = JSON.parse(updates.location);
+        }
+        if (req.files && req.files.length > 0) {
+            const uploadedImages = [];
+            for (const file of req.files) {
+                const uploaded = await uploadImage(file);
+                uploadedImages.push({
+                    url: uploaded.secure_url,
+                    public_id: uploaded.public_id,
+                });
+            }
+            updates.images = uploadedImages;
+        }
+        const updatedListing = await Listing.findByIdAndUpdate(listingId, updates, { new: true, runValidators: true });
         return res.status(200).json({
             success: true,
             message: "Listing updated successfully!",

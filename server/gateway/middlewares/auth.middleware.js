@@ -6,7 +6,7 @@ export const verifyJWT = (req, res, next) => {
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: "Authentication required."
+                message: "Authentication required!"
             });
         }
         const decoded = jwt.verify(
@@ -21,4 +21,20 @@ export const verifyJWT = (req, res, next) => {
             message: error.message,
         });
     }
+};
+
+export const optionalVerifyJWT = (req, res, next) => {
+    const token = req.cookies.token;
+    if (!token) {
+        return next();
+    }
+    try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid token",
+        });
+    }
+    next();
 };

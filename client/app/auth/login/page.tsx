@@ -1,29 +1,10 @@
 "use client";
 
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AuthPageShell } from "../_components/auth-page-shell";
+import { AuthPageShell } from "@/components/auth-page-shell";
 import { useAppContext } from "@/context/AppContext";
-
-const GATEWAY_BASE_URL = process.env.NEXT_PUBLIC_GATEWAY_URL!;
-
-function buildUrl(baseUrl: string, path: string) {
-  return `${baseUrl.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
-}
-
-function getErrorMessage(error: unknown, fallback: string) {
-  if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.message;
-    if (typeof message === "string" && message.trim()) {
-      return message;
-    }
-  }
-  if (error instanceof Error && error.message.trim()) {
-    return error.message;
-  }
-  return fallback;
-}
+import { login } from "@/services/auth/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,11 +25,7 @@ export default function LoginPage() {
     setStatus(null);
 
     try {
-      await axios.post(
-        buildUrl(GATEWAY_BASE_URL, "/auth/login"),
-        { email, password },
-        { withCredentials: true },
-      );
+      await login({ email, password });
       const authenticatedUser = await refreshAuth();
       if (!authenticatedUser) {
         throw new Error("Unable to load your profile.");
@@ -56,7 +33,7 @@ export default function LoginPage() {
       router.push("/");
       router.refresh();
     } catch (error) {
-      setStatus(getErrorMessage(error, "Login failed."));
+      setStatus(error instanceof Error ? error.message : "Login failed.");
     } finally {
       setSubmitting(false);
     }
@@ -77,24 +54,36 @@ export default function LoginPage() {
           void handleLogin();
         }}
       >
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Email address"
-          className="h-14 rounded-[1.2rem] border border-black/10 bg-white px-4 text-sm outline-none transition placeholder:text-black/35 focus:border-black/30 focus:bg-white"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Password"
-          className="h-14 rounded-[1.2rem] border border-black/10 bg-white px-4 text-sm outline-none transition placeholder:text-black/35 focus:border-black/30 focus:bg-white"
-        />
+        <label className="grid gap-2">
+          <span className="text-[0.65rem] uppercase tracking-[0.3em] text-black/55">
+            Email address
+          </span>
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            placeholder="you@example.com"
+            className="h-14 rounded-[1.2rem] border border-black/10 bg-white px-4 text-sm outline-none transition placeholder:text-black/30 focus:border-black/30 focus:bg-white"
+          />
+        </label>
+        <label className="grid gap-2">
+          <span className="text-[0.65rem] uppercase tracking-[0.3em] text-black/55">
+            Password
+          </span>
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            className="h-14 rounded-[1.2rem] border border-black/10 bg-white px-4 text-sm outline-none transition placeholder:text-black/30 focus:border-black/30 focus:bg-white"
+          />
+        </label>
         <button
           type="submit"
           disabled={submitting}
-          className="h-14 rounded-[1.2rem] bg-black px-6 text-sm font-semibold text-white transition hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-70"
+          className="mt-1 h-14 rounded-[1.2rem] bg-black px-6 text-sm font-semibold text-white transition hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {submitting ? "Signing in..." : "Continue"}
         </button>

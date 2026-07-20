@@ -1,135 +1,89 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { conversations, getConversationById } from "@/app/marketplace-data";
-import { SectionHeading, Surface } from "@/app/components/marketplace";
+"use client";
 
-export default async function MessagesPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-  const threadParam = typeof params.thread === "string" ? params.thread : conversations[0]?.id;
-  const activeConversation = getConversationById(threadParam);
+import { Search } from "lucide-react";
 
-  if (!activeConversation) {
-    notFound();
-  }
-
+export default function MessagesPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
-      <SectionHeading
-        eyebrow="Messages"
-        title="Talk to sellers without losing the listing context."
-        description="This layout keeps the chat list, the active conversation, and the product reference together."
-      />
+    <div className="mx-auto">
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[0.38fr_0.62fr]">
-        <Surface className="overflow-hidden">
-          <div className="border-b border-black/10 px-5 py-4">
-            <p className="text-[0.65rem] uppercase tracking-[0.3em] text-zinc-500">
-              Conversations
-            </p>
-          </div>
-          <div className="divide-y divide-black/10">
-            {conversations.map((conversation) => (
-              <Link
-                key={conversation.id}
-                href={`/messages?thread=${conversation.id}`}
-                className={`block px-5 py-4 transition ${
-                  conversation.id === activeConversation.id ? "bg-zinc-50" : "hover:bg-black/5"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-base font-semibold text-zinc-950">{conversation.name}</h2>
-                    <p className="mt-1 text-sm text-zinc-600">{conversation.productTitle}</p>
-                  </div>
-                  <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-zinc-600">
-                    {conversation.status}
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-zinc-600">{conversation.snippet}</p>
-                <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
-                  <span>{conversation.price}</span>
-                  <span>{conversation.updatedAt}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </Surface>
-
-        <Surface className="overflow-hidden">
-          <div className="border-b border-black/10 px-5 py-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[0.65rem] uppercase tracking-[0.3em] text-zinc-500">Chat</p>
-                <h2 className="mt-1 text-xl font-semibold text-zinc-950">
-                  {activeConversation.name}
-                </h2>
-              </div>
-              <Link
-                href={`/products/${activeConversation.productSlug}`}
-                className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-black/20 hover:bg-black/5"
-              >
-                Open listing
-              </Link>
+      <div className="grid lg:min-h-[calc(100vh-13rem)] lg:grid-cols-[360px_1fr]">
+        <aside className="flex min-h-128 flex-col overflow-hidden border border-black/10 bg-white shadow-[0_20px_70px_rgba(17,17,17,0.06)]">
+          <div className="border-b border-black/10 p-4">
+            <div className="flex items-center gap-3 rounded-[1.4rem] border border-black/10 bg-zinc-50 px-4 py-3">
+              <Search className="h-4 w-4 shrink-0 text-zinc-400" />
+              <input
+                type="search"
+                placeholder="Search chats"
+                aria-label="Search chats"
+                className="w-full bg-transparent text-sm outline-none placeholder:text-zinc-400"
+              />
             </div>
           </div>
 
-          <div className="grid gap-4 p-5">
-            <div className="rounded-[1.4rem] border border-black/10 bg-zinc-50 p-4">
-              <p className="text-[0.65rem] uppercase tracking-[0.3em] text-zinc-500">
-                Product reference
-              </p>
-              <p className="mt-2 text-base font-semibold text-zinc-950">
-                {activeConversation.productTitle}
-              </p>
-              <p className="mt-1 text-sm text-zinc-600">
-                Asking price {activeConversation.price} · keep the deal and condition discussion
-                in the same thread.
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              {activeConversation.messages.map((message) => (
+          <div className="flex-1 overflow-auto p-4">
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, index) => (
                 <div
-                  key={message.id}
-                  className={`max-w-[85%] rounded-[1.4rem] px-4 py-3 text-sm leading-6 ${
-                    message.from === "buyer"
-                      ? "ml-auto bg-zinc-950 text-white"
-                      : "bg-zinc-100 text-zinc-900"
-                  }`}
+                  key={index}
+                  className="animate-pulse rounded-[1.4rem] border border-dashed border-zinc-200 bg-zinc-50 p-4"
                 >
-                  <p>{message.text}</p>
-                  <p
-                    className={`mt-2 text-[0.72rem] ${
-                      message.from === "buyer" ? "text-white/60" : "text-zinc-500"
-                    }`}
-                  >
-                    {message.time}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-zinc-200" />
+                    <div className="min-w-0 flex-1">
+                      <div className="h-3 w-2/3 rounded-full bg-zinc-200" />
+                      <div className="mt-3 h-3 w-1/2 rounded-full bg-zinc-200" />
+                    </div>
+                    <div className="h-3 w-10 rounded-full bg-zinc-200" />
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
+        </aside>
 
-            <div className="rounded-[1.4rem] border border-black/10 bg-white p-4">
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                <input
-                  type="text"
-                  placeholder="Write a message"
-                  className="h-12 rounded-[1.1rem] border border-black/10 bg-zinc-50 px-4 text-sm outline-none transition placeholder:text-zinc-400 focus:border-black/30 focus:bg-white"
-                />
-                <button
-                  type="button"
-                  className="h-12 rounded-[1.1rem] bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-black"
-                >
-                  Send
-                </button>
-              </div>
+        <main className="flex min-h-128 flex-col overflow-hidden border border-black/10 bg-white shadow-[0_20px_70px_rgba(17,17,17,0.06)]">
+          <div className="flex items-center justify-between border-b border-black/10 px-5 py-5">
+            <div>
+              <h2 className="mt-2 text-xl font-semibold tracking-tight text-zinc-950">
+                Select a thread
+              </h2>
+            </div>
+            <div className="rounded-full border border-dashed border-zinc-300 px-3 py-1 text-[0.65rem] uppercase tracking-[0.3em] text-zinc-500">
+              Empty
             </div>
           </div>
-        </Surface>
+
+          <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
+            <div className="max-w-md text-center">
+              <div className="mx-auto mb-6 h-16 w-16 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50" />
+              <h3 className="text-2xl font-semibold tracking-tight text-zinc-950">
+                No conversation is selected yet.
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-zinc-600">
+                Pick a chat from the left once live threads are available. Messages, buyer details,
+                and replies will render here.
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-black/10 p-4 sm:p-5">
+            <div className="flex items-end gap-3 rounded-3xl border border-black/10 bg-zinc-50 p-3">
+              <input
+                type="text"
+                disabled
+                placeholder="Write a message..."
+                className="h-12 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-zinc-400 disabled:cursor-not-allowed"
+              />
+              <button
+                type="button"
+                disabled
+                className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-semibold text-white opacity-60"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );

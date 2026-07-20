@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { CATEGORIES } from "../config/categories.js";
 
 const listingSchema = new mongoose.Schema(
     {
@@ -23,6 +24,7 @@ const listingSchema = new mongoose.Schema(
         },
         category: {
             type: String,
+            enum: CATEGORIES,
             required: [true, "Category is required."],
             trim: true,
             minlength: [3, "Category must be at least 3 characters long."],
@@ -33,7 +35,6 @@ const listingSchema = new mongoose.Schema(
             type: String,
             trim: true,
             default: "",
-            minlength: [3, "Subcategory must be at least 3 characters long."],
             maxlength: [100, "Subcategory cannot exceed 100 characters."],
         },
         brand: {

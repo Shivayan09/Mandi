@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Surface } from "@/app/components/marketplace";
+import { Surface } from "@/components/marketplace";
 
 export default function NotFound() {
   return (

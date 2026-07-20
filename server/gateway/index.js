@@ -7,7 +7,7 @@ import userRouter from "./routes/user.routes.js";
 import { logger } from "./middlewares/logger.middleware.js";
 import { rateLimiter } from "./middlewares/rateLimiter.middleware.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
-import { verifyJWT } from "./middlewares/auth.middleware.js";
+import { optionalVerifyJWT, verifyJWT } from "./middlewares/auth.middleware.js";
 import cookieParser from "cookie-parser";
 import chatRouter from "./routes/chat.routes.js";
 
@@ -37,7 +37,7 @@ app.get("/health", (req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/users", verifyJWT, userRouter);
-app.use("/listing", verifyJWT, listingRouter);
+app.use("/listing", optionalVerifyJWT, listingRouter);
 app.use("/chat", verifyJWT, chatRouter);
 
 app.use(errorHandler);
