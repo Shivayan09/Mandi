@@ -4,6 +4,9 @@ const MAX_TOKENS = 10;
 const REFILL_RATE = 1;
 
 export const rateLimiter = (req, res, next) => {
+    if (req.originalUrl?.startsWith("/chat")) {
+        return next();
+    }
     const key = req.ip;
     const now = Date.now();
     let bucket = buckets.get(key);

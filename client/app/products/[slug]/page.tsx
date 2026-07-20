@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import { deleteListing, fetchListings, updateListing } from "@/services/listings/api";
+import { createConversation } from "@/services/chat/api";
 import type { ListingView } from "@/services/listings/types";
 
 export default function ProductDetailsPage() {
@@ -16,6 +17,7 @@ export default function ProductDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isOpeningChat, setIsOpeningChat] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -71,6 +73,31 @@ export default function ProductDetailsPage() {
       router.push("/products");
     } catch (actionErr) {
       setActionError(actionErr instanceof Error ? actionErr.message : "Could not delete listing");
+    }
+  };
+
+  const handleTalkToSeller = async () => {
+    if (!product) return;
+    if (!user) {
+      router.push("/auth/login");
+      return;
+    }
+    if (user.userId === product.ownerId) {
+      router.push("/messages");
+      return;
+    }
+
+    setIsOpeningChat(true);
+    setActionError(null);
+
+    try {
+      const conversation = await createConversation(product.ownerId);
+      const conversationId = conversation?._id;
+      router.push(conversationId ? `/messages?conversationId=${conversationId}` : "/messages");
+    } catch (talkError) {
+      setActionError(talkError instanceof Error ? talkError.message : "Could not open chat");
+    } finally {
+      setIsOpeningChat(false);
     }
   };
 
@@ -296,12 +323,14 @@ export default function ProductDetailsPage() {
                   >
                     Proceed to buy
                   </Link>
-                  <Link
-                    href="/messages"
-                    className="rounded-full border border-black/20 px-5 py-3 text-sm font-semibold transition hover:bg-black/10"
+                  <button
+                    type="button"
+                    onClick={() => void handleTalkToSeller()}
+                    disabled={isOpeningChat}
+                    className="rounded-full border border-black/20 px-5 py-3 text-sm font-semibold transition hover:bg-black/10 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Talk to seller
-                  </Link>
+                    {isOpeningChat ? "Opening chat..." : "Talk to seller"}
+                  </button>
                 </div>
               </div>
 

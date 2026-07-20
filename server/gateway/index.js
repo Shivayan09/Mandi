@@ -10,6 +10,7 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 import { optionalVerifyJWT, verifyJWT } from "./middlewares/auth.middleware.js";
 import cookieParser from "cookie-parser";
 import chatRouter from "./routes/chat.routes.js";
+import http from "http";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3001";
 const corsOptions = {
@@ -38,12 +39,23 @@ app.get("/health", (req, res) => {
 app.use("/auth", authRouter);
 app.use("/users", verifyJWT, userRouter);
 app.use("/listing", optionalVerifyJWT, listingRouter);
-app.use("/chat", verifyJWT, chatRouter);
+app.use("/chat", chatRouter);
 
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+server.on("upgrade", (req, socket, head) => {
+    const match = req.headers.cookie?.match(/(?:^|;\s*)token=([^;]+)/);
+    if (match) {
+        req.headers["x-user-token"] = decodeURIComponent(match[1]);
+        console.log("Injected token");
+    }
+    chatRouter.upgrade(req, socket, head);
+});
+
+server.listen(PORT, () => {
     console.log(`Gateway running on port ${PORT}`);
 });
