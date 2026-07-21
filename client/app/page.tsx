@@ -67,15 +67,6 @@ export default function Home() {
     return Array.from(map.values()).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
   }, [listings]);
 
-  const stats = useMemo(
-    () => [
-      { label: "Active listings", value: String(listings.length) },
-      { label: "Categories", value: String(categories.length) },
-      { label: "Cities", value: String(new Set(listings.map((listing) => listing.location)).size) },
-    ],
-    [categories.length, listings],
-  );
-
   return (
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:px-6 lg:px-8">
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
