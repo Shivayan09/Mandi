@@ -47,11 +47,9 @@ export async function createConversation(receiverId: string) {
     body: JSON.stringify({ receiverId }),
   });
   const data = await readEnvelope<Conversation>(response);
-
   if (!response.ok) {
     throw new Error(data.message ?? "Could not open conversation");
   }
-
   return data.conversation ?? null;
 }
 
@@ -60,11 +58,9 @@ export async function fetchConversations() {
     cache: "no-store",
   });
   const data = await readEnvelope<Conversation>(response);
-
   if (!response.ok) {
     throw new Error(data.message ?? "Could not load conversations");
   }
-
   return data.conversations ?? [];
 }
 
@@ -73,11 +69,9 @@ export async function fetchMessages(conversationId: string) {
     cache: "no-store",
   });
   const data = await readEnvelope<Conversation>(response);
-
   if (!response.ok) {
     throw new Error(data.message ?? "Could not load messages");
   }
-
   return data.messages ?? [];
 }
 

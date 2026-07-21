@@ -47,7 +47,6 @@ export default function Home() {
   }, []);
 
   const heroProduct = listings[0];
-  const secondaryProducts = listings.slice(1, 3);
 
   const categories = useMemo<CategorySummary[]>(() => {
     const map = new Map<string, CategorySummary>();
@@ -78,9 +77,9 @@ export default function Home() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="relative overflow-hidden rounded-[2.4rem] border border-black/10 bg-[#111111] px-6 py-8 text-white sm:px-8 sm:py-10 lg:min-h-168 lg:px-10 lg:py-12">
+    <div className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:px-6 lg:px-8">
+      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="relative overflow-hidden rounded-[2.4rem] border border-black/10 bg-[#111111] px-6 md:px-10 py-8 md:py-12 text-white">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_30%)]" />
 
           <div className="relative z-10 flex h-full flex-col">
@@ -117,35 +116,7 @@ export default function Home() {
               >
                 Browse listings
               </button>
-            </form>
-
-            <div className="mt-10 gap-5 hidden md:flex">
-              {stats.map((stat) => (
-                <div key={stat.label} className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
-                  <p className="text-[0.62rem] uppercase tracking-[0.34em] text-white/50">
-                    {stat.label}
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                    {loading ? "..." : stat.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-auto flex flex-wrap gap-3 pt-8">
-              <Link
-                href="/products"
-                className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100"
-              >
-                Browse all
-              </Link>
-              <Link
-                href="/sell"
-                className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10"
-              >
-                Create listing
-              </Link>
-            </div>
+            </form>            
           </div>
         </div>
 
@@ -206,47 +177,6 @@ export default function Home() {
                 Loading live listings...
               </div>
             )}
-
-            <div className="mt-5 grid gap-3 border-t border-black/10 pt-5">
-              {secondaryProducts.length ? (
-                secondaryProducts.map((product) => (
-                  <Link
-                    key={product.slug}
-                    href={`/products/${product.slug}`}
-                    className="group flex items-center gap-4 py-2 transition hover:-translate-y-0.5"
-                  >
-                    <div className="relative h-16 w-16 overflow-hidden rounded-[1.2rem] bg-zinc-100">
-                      {product.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={product.imageUrl}
-                          alt={product.title}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : null}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[0.62rem] uppercase tracking-[0.3em] text-zinc-500">
-                        {product.category}
-                      </p>
-                      <h3 className="mt-1 truncate text-sm font-semibold text-zinc-950">
-                        {product.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-zinc-600">
-                        {product.location} | {product.price}
-                      </p>
-                    </div>
-                    <span className="text-sm font-medium text-zinc-950 transition group-hover:translate-x-1">
-                      View
-                    </span>
-                  </Link>
-                ))
-              ) : loading ? (
-                <div className="rounded-[1.4rem] border border-dashed border-zinc-300 p-6 text-sm text-zinc-500">
-                  Loading more listings...
-                </div>
-              ) : null}
-            </div>
           </div>
         </div>
       </section>
@@ -306,7 +236,7 @@ export default function Home() {
               {error}
             </div>
           ) : (
-            listings.slice(0, 6).map((product) => <ProductCard key={product.slug} product={product} />)
+            listings.slice(0, 3).map((product) => <ProductCard key={product.slug} product={product} />)
           )}
         </div>
       </section>

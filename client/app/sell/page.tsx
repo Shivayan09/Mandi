@@ -5,6 +5,8 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 import { Surface } from "@/components/marketplace";
 import { createListing } from "@/services/listings/api";
+import { useAppContext } from "@/context/AppContext";
+import { useRouter } from "next/navigation";
 
 export default function SellPage() {
   const [title, setTitle] = useState("");
@@ -18,6 +20,8 @@ export default function SellPage() {
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const {user} = useAppContext();
+  const router = useRouter();
 
   useEffect(() => {
     return () => {
@@ -28,14 +32,11 @@ export default function SellPage() {
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const updatedImages = [...images];
     const updatedPreviews = [...previews];
-
     if (updatedPreviews[index]) {
       URL.revokeObjectURL(updatedPreviews[index]);
     }
-
     updatedImages[index] = file;
     updatedPreviews[index] = URL.createObjectURL(file);
     setImages(updatedImages);
@@ -46,7 +47,6 @@ export default function SellPage() {
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
-
     try {
       const normalizedTitle = title.trim();
       const normalizedDescription = description.trim();
@@ -55,7 +55,6 @@ export default function SellPage() {
       const normalizedBrand = brand.trim();
       const parsedPrice = Number.parseFloat(price.replace(/[^0-9.]/g, ""));
       const uploadedImages = images.filter(Boolean);
-
       if (!normalizedTitle) throw new Error("Add a product title.");
       if (!normalizedDescription) throw new Error("Add a description.");
       if (!normalizedCategory) throw new Error("Add a category.");
@@ -63,23 +62,16 @@ export default function SellPage() {
       if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) throw new Error("Enter a valid price.");
       if (!normalizedLocation) throw new Error("Add a location.");
       if (uploadedImages.length === 0) throw new Error("Add at least one product photo.");
-
-      const [cityPart, statePart] = normalizedLocation
-        .split(",")
-        .map((part) => part.trim())
-        .filter(Boolean);
-
+      const [cityPart, statePart] = normalizedLocation.split(",").map((part) => part.trim()).filter(Boolean);
       const formData = new FormData();
       formData.append("title", normalizedTitle);
       formData.append("description", normalizedDescription);
       formData.append("category", normalizedCategory);
       formData.append("condition", condition);
       formData.append("price", parsedPrice.toString());
-
       if (normalizedBrand) {
         formData.append("brand", normalizedBrand);
       }
-
       formData.append(
         "location",
         JSON.stringify({
@@ -88,13 +80,10 @@ export default function SellPage() {
           country: "India",
         }),
       );
-
       uploadedImages.forEach((image) => {
         formData.append("images", image);
       });
-
       await createListing(formData);
-
       window.location.assign("/products");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not publish listing");
@@ -103,21 +92,10 @@ export default function SellPage() {
     }
   };
 
-  const categories = [
-    "electronics",
-    "vehicles",
-    "fashion",
-    "books",
-    "furniture",
-    "sports",
-    "real_estate",
-    "services",
-    "jobs",
-    "others",
-  ];
+  const categories = ["electronics","vehicles","fashion","books","furniture","sports","real_estate","services","jobs","others",];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+    user ? (<div className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
         <Surface className="p-6 sm:p-8 lg:p-10">
           <p className="text-[0.65rem] uppercase tracking-[0.34em] text-zinc-500">List an item</p>
@@ -196,10 +174,7 @@ export default function SellPage() {
 
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat
-                      .split("_")
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(" ")}
+                    {cat.split("_").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
                   </option>
                 ))}
               </select>
@@ -289,6 +264,16 @@ export default function SellPage() {
           </div>
         </aside>
       </div>
-    </div>
+    </div>)
+    : (
+      <div className="min-h-[60vh] w-full flex items-center justify-center">
+        <div className="flex items-center justify-center flex-col gap-3">
+          <p>Log in to list and sell your items</p>
+          <button onClick={() => {router.push('/auth/login')}} className="bg-black transition-all hover:bg-black/80 text-white px-5 py-2 rounded-xl cursor-pointer">
+            Continue to Log in
+          </button>
+        </div>
+      </div>
+    )
   );
 }

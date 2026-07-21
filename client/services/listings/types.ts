@@ -1,6 +1,10 @@
 export type BackendListing = {
   _id: string;
   userId: string;
+  seller?: {
+    userId: string;
+    name: string;
+  } | null;
   title: string;
   description: string;
   category: string;

@@ -14,7 +14,6 @@ export const verifyJWT = (req, res, next) => {
                 message: "Authentication required!",
             });
         }
-
         req.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
     } catch (error) {

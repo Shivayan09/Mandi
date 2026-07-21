@@ -9,11 +9,18 @@ function readEnvelope<T>(response: Response) {
 export async function fetchListings(): Promise<ListingView[]> {
   const response = await apiFetch("/listing", { cache: "no-store" });
   const data = await readEnvelope<BackendListing>(response);
-
   if (!response.ok) {
     throw new Error(data.message ?? "Failed to load listings");
   }
+  return (data.listings ?? []).map(toListingView);
+}
 
+export async function fetchMyListings(): Promise<ListingView[]> {
+  const response = await apiFetch("/listing/me", { cache: "no-store" });
+  const data = await readEnvelope<BackendListing>(response);
+  if (!response.ok) {
+    throw new Error(data.message ?? "Failed to load your listings");
+  }
   return (data.listings ?? []).map(toListingView);
 }
 
@@ -22,11 +29,9 @@ export async function fetchListing(listingId: string): Promise<ListingView | nul
     cache: "no-store",
   });
   const data = await readEnvelope<BackendListing>(response);
-
   if (!response.ok) {
     throw new Error(data.message ?? "Failed to load listing");
   }
-
   return data.listing ? toListingView(data.listing) : null;
 }
 

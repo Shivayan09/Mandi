@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
-import { deleteListing, fetchListings, updateListing } from "@/services/listings/api";
+import { deleteListing, fetchListing, updateListing } from "@/services/listings/api";
 import { createConversation } from "@/services/chat/api";
 import type { ListingView } from "@/services/listings/types";
 
@@ -13,7 +13,7 @@ export default function ProductDetailsPage() {
   const router = useRouter();
   const { user } = useAppContext();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  const [listings, setListings] = useState<ListingView[]>([]);
+  const [product, setProduct] = useState<ListingView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -21,34 +21,32 @@ export default function ProductDetailsPage() {
 
   useEffect(() => {
     let active = true;
-
     const loadListings = async () => {
       setLoading(true);
-
       try {
-        const items = await fetchListings();
+        if (!slug) {
+          throw new Error("Invalid listing id");
+        }
+        const item = await fetchListing(slug);
         if (!active) return;
-        setListings(items);
-        setError(null);
+        setProduct(item);
+        setError(item ? null : "That listing does not exist.");
       } catch (fetchError) {
         if (!active) return;
         setError(fetchError instanceof Error ? fetchError.message : "Failed to load listing");
-        setListings([]);
+        setProduct(null);
       } finally {
         if (active) {
           setLoading(false);
         }
       }
     };
-
     void loadListings();
-
     return () => {
       active = false;
     };
-  }, []);
+  }, [slug]);
 
-  const product = useMemo(() => listings.find((item) => item.slug === slug), [listings, slug]);
   const isOwner = Boolean(user && product && user.userId === product.ownerId);
   const mapQuery = product?.location?.trim() ?? "";
   const mapUrl = mapQuery && mapQuery.toLowerCase() !== "unknown" && mapQuery.toLowerCase() !== "online" ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=14&output=embed` : null;
@@ -67,7 +65,6 @@ export default function ProductDetailsPage() {
 
   const handleDelete = async () => {
     if (!product || !window.confirm("Delete this listing? This cannot be undone.")) return;
-
     try {
       await deleteListing(product.slug);
       router.push("/products");
@@ -86,10 +83,8 @@ export default function ProductDetailsPage() {
       router.push("/messages");
       return;
     }
-
     setIsOpeningChat(true);
     setActionError(null);
-
     try {
       const conversation = await createConversation(product.ownerId);
       const conversationId = conversation?._id;

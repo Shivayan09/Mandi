@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Surface } from "@/components/marketplace";
 import { deleteListing, fetchListingRecord, updateListing } from "@/services/listings/api";
 import type { BackendListing } from "@/services/listings/types";
+import { useAppContext } from "@/context/AppContext";
 
 const CATEGORIES = [
   "electronics",
@@ -45,6 +46,7 @@ export default function EditListingPage() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
   const [negotiable, setNegotiable] = useState("true");
+  const {user} = useAppContext();
 
   useEffect(() => {
     return () => {
@@ -223,7 +225,7 @@ export default function EditListingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
+    user ? (<div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr]">
         <aside className="space-y-6">
           <div className="overflow-hidden rounded-4xl border border-black/10 bg-white">
@@ -435,6 +437,16 @@ export default function EditListingPage() {
           </form>
         </Surface>
       </div>
-    </div>
+    </div>)
+    : (
+      <div className="min-h-[60vh] w-full flex items-center justify-center">
+        <div className="flex items-center justify-center flex-col gap-3">
+          <p>Log in to edit your item</p>
+          <button onClick={() => {router.push('/auth/login')}} className="bg-black transition-all hover:bg-black/80 text-white px-5 py-2 rounded-xl cursor-pointer">
+            Continue to Log in
+          </button>
+        </div>
+      </div>
+    )
   );
 }

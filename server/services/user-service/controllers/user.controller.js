@@ -40,14 +40,12 @@ export const createUser = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
-
         if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
             });
         }
-
         return res.json({
             success: true,
             user: {

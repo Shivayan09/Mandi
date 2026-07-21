@@ -113,7 +113,7 @@ export function SiteFooter() {
           <FooterLink href="/products" label="Browse products" />
           <FooterLink href="/sell" label="Sell an item" />
           <FooterLink href="/messages" label="Open messages" />
-          <FooterLink href="/auth/login" label="Account access" />
+          <FooterLink href="/account" label="Account access" />
         </div>
       </div>
     </footer>

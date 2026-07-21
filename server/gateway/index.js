@@ -24,9 +24,7 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 app.use(express.json());
-
 app.use(logger);
-
 app.use(rateLimiter);
 
 app.get("/health", (req, res) => {
@@ -40,7 +38,6 @@ app.use("/auth", authRouter);
 app.use("/users", verifyJWT, userRouter);
 app.use("/listing", optionalVerifyJWT, listingRouter);
 app.use("/chat", chatRouter);
-
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

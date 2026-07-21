@@ -1,7 +1,56 @@
+import axios from "axios";
 import Listing from "../models/listing.js";
 import uploadImage from "../utils/uploadImage.js";
 import cloudinary from "../config/cloudinary.js";
 import { CATEGORIES } from "../config/categories.js";
+
+async function fetchSellerProfile(userId) {
+    try {
+        const response = await axios.get(`${process.env.USER_SERVICE_URL}/users/${userId}`, {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+        const profile = response.data?.user ?? response.data;
+        if (!profile) {
+            return null;
+        }
+        return {
+            userId: String(profile.userId ?? userId),
+            name: profile.name ?? `Seller ${String(userId).slice(-4)}`,
+        };
+    } catch {
+        return {
+            userId: String(userId),
+            name: `Seller ${String(userId).slice(-4)}`,
+        };
+    }
+}
+
+async function attachSeller(listing) {
+    if (!listing) return null;
+    const plainListing = typeof listing.toObject === "function" ? listing.toObject() : listing;
+    const seller = await fetchSellerProfile(String(plainListing.userId));
+    return {
+        ...plainListing,
+        seller,
+    };
+}
+
+async function attachSellers(listings) {
+    const uniqueUserIds = [...new Set(listings.map((listing) => String(listing.userId)))];
+    const sellerEntries = await Promise.all(
+        uniqueUserIds.map(async (userId) => [userId, await fetchSellerProfile(userId)]),
+    );
+    const sellerMap = new Map(sellerEntries);
+    return listings.map((listing) => {
+        const plainListing = typeof listing.toObject === "function" ? listing.toObject() : listing;
+        return {
+            ...plainListing,
+            seller: sellerMap.get(String(plainListing.userId)),
+        };
+    });
+}
 
 export const createListing = async (req, res) => {
     try {
@@ -36,10 +85,11 @@ export const createListing = async (req, res) => {
             });
         }
         const listing = await Listing.create({ userId, title, description, category, subCategory, brand, condition, price, negotiable, images: uploadedImages, location, tags, expiresAt, });
+        const hydratedListing = await attachSeller(listing);
         return res.status(201).json({
             success: true,
             message: "Listing created successfully!",
-            listing,
+            listing: hydratedListing,
         });
     } catch (error) {
         if (error.name === "ValidationError") {
@@ -59,10 +109,11 @@ export const createListing = async (req, res) => {
 export const getAllListings = async (req, res) => {
     try {
         const listings = await Listing.find({ status: "active" }).sort({ createdAt: -1 });
+        const hydratedListings = await attachSellers(listings);
         return res.status(200).json({
             success: true,
-            count: listings.length,
-            listings,
+            count: hydratedListings.length,
+            listings: hydratedListings,
         });
     } catch (error) {
         return res.status(500).json({
@@ -82,9 +133,10 @@ export const getListingById = async (req, res) => {
                 message: "Listing not found!",
             });
         }
+        const hydratedListing = await attachSeller(listing);
         return res.status(200).json({
             success: true,
-            listing,
+            listing: hydratedListing,
         });
     } catch (error) {
         return res.status(500).json({
@@ -98,10 +150,11 @@ export const getListingsByUser = async (req, res) => {
     try {
         const { userId } = req.params;
         const listings = await Listing.find({ userId, status: { $ne: "deleted" }, }).sort({ createdAt: -1 });
+        const hydratedListings = await attachSellers(listings);
         return res.status(200).json({
             success: true,
-            count: listings.length,
-            listings,
+            count: hydratedListings.length,
+            listings: hydratedListings,
         });
     } catch (error) {
         return res.status(500).json({
@@ -115,10 +168,11 @@ export const getMyListings = async (req, res) => {
     try {
         const userId = req.user.userId;
         const listings = await Listing.find({ userId, status: { $ne: "deleted" }, }).sort({ createdAt: -1 });
+        const hydratedListings = await attachSellers(listings);
         return res.status(200).json({
             success: true,
-            count: listings.length,
-            listings,
+            count: hydratedListings.length,
+            listings: hydratedListings,
         });
     } catch (error) {
         return res.status(500).json({
@@ -160,10 +214,11 @@ export const updateListing = async (req, res) => {
             updates.images = uploadedImages;
         }
         const updatedListing = await Listing.findByIdAndUpdate(listingId, updates, { new: true, runValidators: true });
+        const hydratedListing = await attachSeller(updatedListing);
         return res.status(200).json({
             success: true,
             message: "Listing updated successfully!",
-            listing: updatedListing,
+            listing: hydratedListing,
         });
     } catch (error) {
         return res.status(500).json({

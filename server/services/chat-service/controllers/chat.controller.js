@@ -2,22 +2,13 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { getIO } from "../socket/socket.js";
 
-function getUserServiceBaseUrl() {
-    return (process.env.USER_SERVICE_URL || "http://localhost:5000").replace(/\/+$/, "");
-}
 
 async function fetchUserProfile(userId) {
     try {
-        const response = await fetch(`${getUserServiceBaseUrl()}/users/${userId}`, {
-            headers: {
-                Accept: "application/json",
-            },
-        });
-
+        const response = await fetch(`${process.env.USER_SERVICE_URL}/users/${userId}`, { headers: { Accept: "application/json" } });
         if (!response.ok) {
             return null;
         }
-
         const data = await response.json();
         return data.user ?? null;
     } catch {
@@ -27,11 +18,7 @@ async function fetchUserProfile(userId) {
 
 async function hydrateConversation(conversation) {
     if (!conversation) return null;
-
-    const plainConversation = typeof conversation.toObject === "function"
-        ? conversation.toObject()
-        : conversation;
-
+    const plainConversation = typeof conversation.toObject === "function" ? conversation.toObject() : conversation;
     const participants = await Promise.all(
         (plainConversation.participants ?? []).map(async (participantId) => {
             const profile = await fetchUserProfile(String(participantId));
@@ -41,11 +28,7 @@ async function hydrateConversation(conversation) {
             };
         }),
     );
-
-    return {
-        ...plainConversation,
-        participants,
-    };
+    return { ...plainConversation, participants };
 }
 
 export const createConversation = async (req, res) => {
@@ -91,9 +74,7 @@ export const createConversation = async (req, res) => {
 export const getConversations = async (req, res) => {
     try {
         const userId = req.user.userId;
-        const conversations = await Conversation.find({ participants: userId, })
-            .populate("lastMessage")
-            .sort({ updatedAt: -1 });
+        const conversations = await Conversation.find({ participants: userId, }).populate("lastMessage").sort({ updatedAt: -1 });
         const hydratedConversations = await Promise.all(conversations.map(hydrateConversation));
         res.status(200).json({
             success: true,

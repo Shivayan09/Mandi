@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import socket from "@/lib/socket";
 import { fetchConversations, fetchMessages, type Conversation, type Message } from "@/services/chat/api";
+import { useRouter } from "next/navigation";
 
 export default function MessagesPage() {
   const searchParams = useSearchParams();
@@ -20,9 +21,10 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
   const selectedConversationId = conversationIdFromQuery ?? manualConversationId;
   const selectedConversationIdRef = useRef<string | null>(selectedConversationId);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
-  const getParticipantId = (participant?: { _id?: string; userId?: string } | null) =>
-    participant?._id ?? participant?.userId ?? null;
+  const getParticipantId = (participant?: { _id?: string; userId?: string } | null) => participant?._id ?? participant?.userId ?? null;
 
   useEffect(() => {
     selectedConversationIdRef.current = selectedConversationId;
@@ -37,7 +39,6 @@ export default function MessagesPage() {
         const items = await fetchConversations();
         if (!active) return;
         setConversations(items);
-
         if (!selectedConversationId && items.length > 0) {
           setManualConversationId(items[0]._id);
         }
@@ -51,20 +52,16 @@ export default function MessagesPage() {
         }
       }
     };
-
     void loadConversations();
-
     return () => {
       active = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!selectedConversationId) return;
-
     let active = true;
-
     const loadMessages = async () => {
       try {
         setLoadingMessages(true);
@@ -81,9 +78,7 @@ export default function MessagesPage() {
         }
       }
     };
-
     void loadMessages();
-
     return () => {
       active = false;
     };
@@ -91,13 +86,11 @@ export default function MessagesPage() {
 
   useEffect(() => {
     socket.connect();
-
     const handleMessage = (message: Message) => {
       if (message.conversation !== selectedConversationIdRef.current) {
         void fetchConversations().then(setConversations).catch(() => undefined);
         return;
       }
-
       setMessages((current) => {
         if (current.some((item) => item._id === message._id)) {
           return current;
@@ -105,22 +98,17 @@ export default function MessagesPage() {
         return [...current, message];
       });
     };
-
     const refreshConversations = () => {
-      void fetchConversations()
-        .then((items) => {
+      void fetchConversations().then((items) => {
           setConversations(items);
           if (!selectedConversationIdRef.current && items.length > 0) {
             setManualConversationId(items[0]._id);
           }
-        })
-        .catch(() => undefined);
+        }).catch(() => undefined);
     };
-
     socket.on("message:new", handleMessage);
     socket.on("conversation:new", refreshConversations);
     socket.on("conversation:updated", refreshConversations);
-
     return () => {
       socket.off("message:new", handleMessage);
       socket.off("conversation:new", refreshConversations);
@@ -133,6 +121,13 @@ export default function MessagesPage() {
     if (!selectedConversationId) return;
     socket.emit("joinConversation", selectedConversationId);
   }, [selectedConversationId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages, selectedConversationId, loadingMessages]);
 
   const selectedConversation = useMemo(
     () => conversations.find((conversation) => conversation._id === selectedConversationId) ?? null,
@@ -151,7 +146,6 @@ export default function MessagesPage() {
   const handleSendMessage = () => {
     const cleanText = messageText.trim();
     if (!selectedConversationId || !cleanText) return;
-
     socket.emit(
       "sendMessage",
       { conversationId: selectedConversationId, text: cleanText },
@@ -166,8 +160,8 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="mx-auto h-[calc(100dvh-10rem)] min-h-150">
-      <div className="grid h-full min-h-0 lg:grid-cols-[360px_1fr]">
+    user ? (<div className="mx-auto h-[calc(100dvh-10rem)] min-h-145">
+      <div className="grid h-full min-h-0 lg:grid-cols-[320px_1fr]">
         <aside className="hidden min-h-0 flex-col overflow-hidden border border-black/10 bg-white shadow-[0_20px_70px_rgba(17,17,17,0.06)] lg:flex">
           <div className="border-b border-black/10 p-4">
             <div className="flex items-center gap-3 rounded-xl border border-black/10 bg-zinc-50 px-4 py-3">
@@ -207,11 +201,10 @@ export default function MessagesPage() {
                       key={conversation._id}
                       type="button"
                       onClick={() => setManualConversationId(conversation._id)}
-                      className={`w-full rounded-[1.4rem] border p-4 text-left transition ${
-                        isActive
-                          ? "border-black bg-black text-white"
-                          : "border-black/10 bg-white hover:border-black/20 hover:bg-black/5"
-                      }`}
+                      className={`w-full cursor-pointer rounded-2xl border p-2 text-left transition ${isActive
+                        ? "border-black bg-black text-white"
+                        : "border-black/10 bg-white hover:border-black/20 hover:bg-black/5"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`flex h-12 w-12 items-center justify-center rounded-full ${isActive ? "bg-white/10" : "bg-zinc-100"}`}>
@@ -265,15 +258,15 @@ export default function MessagesPage() {
                     return (
                       <div key={message._id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                         <div
-                          className={`max-w-[75%] rounded-3xl px-4 py-3 text-sm leading-6 ${
-                            mine ? "bg-black text-white" : "bg-zinc-100 text-zinc-950"
-                          }`}
+                          className={`max-w-[75%] rounded-3xl px-4 py-3 text-sm leading-6 ${mine ? "bg-black text-white" : "bg-zinc-100 text-zinc-950"
+                            }`}
                         >
                           {message.text}
                         </div>
                       </div>
                     );
                   })}
+                  <div ref={messagesEndRef} />
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center px-6 py-10 sm:px-10">
@@ -337,6 +330,16 @@ export default function MessagesPage() {
           </div>
         </main>
       </div>
-    </div>
+    </div>)
+      : (
+        <div className="min-h-[60vh] w-full flex items-center justify-center">
+          <div className="flex items-center justify-center flex-col gap-3">
+            <p>Log in to see your messages</p>
+            <button onClick={() => { router.push('/auth/login') }} className="bg-black transition-all hover:bg-black/80 text-white px-5 py-2 rounded-xl cursor-pointer">
+              Continue to Log in
+            </button>
+          </div>
+        </div>
+      )
   );
 }

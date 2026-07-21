@@ -40,7 +40,8 @@ function buildLocation(listing: BackendListing) {
 
 export function toListingView(listing: BackendListing): ListingView {
   const location = buildLocation(listing);
-  const price = `₹${Number(listing.price).toLocaleString("en-IN")}`;
+  const price = `\u20B9${Number(listing.price).toLocaleString("en-IN")}`;
+  const sellerName = listing.seller?.name?.trim() || `Seller ${listing.userId.slice(-4)}`;
   const tags = Array.from(
     new Set([
       ...(listing.tags ?? []),
@@ -64,7 +65,7 @@ export function toListingView(listing: BackendListing): ListingView {
     tags,
     imageUrl: listing.images?.[0]?.url ?? null,
     seller: {
-      name: `Seller ${listing.userId.slice(-4)}`,
+      name: sellerName,
       verified: false,
       response: "Message the seller to ask about condition and pickup.",
       rating: "New",
