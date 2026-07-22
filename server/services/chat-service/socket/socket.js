@@ -35,7 +35,6 @@ export const initializeSocket = (server) => {
 
     io.on("connection", (socket) => {
         console.log(`Socket connected: ${socket.id}`);
-        console.log(socket.user);
         socket.join(`user:${socket.user.userId}`);
         socket.on("joinConversation", async (conversationId) => {
             try {

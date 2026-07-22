@@ -73,7 +73,7 @@ export function SiteHeader() {
               onClick={() => {
                 void handleLogout();
               }}
-              className="rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-black/70 transition hover:border-black hover:text-black"
+              className="rounded-full cursor-pointer border border-black/10 px-4 py-2 text-sm font-medium text-black/70 transition hover:border-black hover:text-black"
             >
               Logout
             </button>

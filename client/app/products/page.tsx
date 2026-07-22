@@ -208,7 +208,7 @@ export default function ProductsPage() {
                       void handleLogout();
                       setMobileSidebarOpen(false);
                     }}
-                    className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-left text-sm font-medium text-zinc-700"
+                    className="rounded-xl border cursor-pointer border-zinc-300 bg-white px-4 py-3 text-left text-sm font-medium text-zinc-700"
                   >
                     Logout
                   </button>
@@ -239,7 +239,7 @@ export default function ProductsPage() {
                   className="h-full flex-1 bg-transparent pr-4 text-sm outline-none placeholder:text-zinc-400"
                 />
 
-                <button className="border-l border-zinc-300 px-5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50">
+                <button className="border-l cursor-pointer border-zinc-300 px-5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50">
                   Search
                 </button>
               </div>

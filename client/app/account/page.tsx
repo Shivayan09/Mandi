@@ -83,7 +83,6 @@ export default function AccountOverviewPage() {
               <ActionLink href="/account/personal-info" label="Personal info" description="Review contact details" />
               <ActionLink href="/account/settings" label="Platform settings" description="Update preferences" />
               <ActionLink href="/sell" label="Create listing" description="Start selling an item" />
-              <ActionLink href="/messages" label="Open messages" description="Continue conversations" />
             </div>
           </Surface>
         </div>

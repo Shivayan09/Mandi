@@ -40,7 +40,7 @@ export const createUser = async (req, res) => {
 
 export const getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId);
+        const {userId} = req.params;
         const cacheKey = `user:${userId}`;
         const cachedUser = await redis.get(cacheKey);
         if (cachedUser) {

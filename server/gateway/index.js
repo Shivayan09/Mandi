@@ -48,7 +48,6 @@ server.on("upgrade", (req, socket, head) => {
     const match = req.headers.cookie?.match(/(?:^|;\s*)token=([^;]+)/);
     if (match) {
         req.headers["x-user-token"] = decodeURIComponent(match[1]);
-        console.log("Injected token");
     }
     chatRouter.upgrade(req, socket, head);
 });
