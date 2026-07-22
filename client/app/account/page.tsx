@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { InfoPill, SectionHeading, StatCard, Surface } from "@/components/marketplace";
+import { InfoPill, SectionHeading, Surface } from "@/components/marketplace";
 import { useAppContext } from "@/context/AppContext";
 
 export default function AccountOverviewPage() {
@@ -11,8 +11,6 @@ export default function AccountOverviewPage() {
   if (!user) return null;
 
   const authLabel = user.provider === "google" ? "Google SSO" : "Email and password";
-  const verificationLabel = user.emailVerified ? "Verified" : "Pending verification";
-  const onboardingLabel = user.onboardingCompleted ? "Complete" : "Needs attention";
   const initials = user.name?.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "U";
 
   return (
