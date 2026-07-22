@@ -133,7 +133,10 @@ export const getListingById = async (req, res) => {
             { new: true }
         );
         if (!listing) {
-            return res.status(404).json({ success: false, message: "Listing not found!" });
+            return res.status(404).json({
+                success: false,
+                message: "Listing not found!"
+            });
         }
         const hydratedListing = await attachSeller(listing);
         const responseData = { success: true, listing: hydratedListing };
@@ -193,10 +196,14 @@ export const updateListing = async (req, res) => {
     try {
         const { listingId } = req.params;
         const listing = await Listing.findById(listingId);
-        if (!listing) return res.status(404).json({ success: false, message: "Listing not found!" });
+        if (!listing) return res.status(404).json({
+            success: false,
+            message: "Listing not found!"
+        });
         if (listing.userId.toString() !== req.user.userId) {
             return res.status(403).json({
-                success: false, message: "Unauthorized!"
+                success: false,
+                message: "Unauthorized!"
             });
         }
         const updates = { ...req.body };

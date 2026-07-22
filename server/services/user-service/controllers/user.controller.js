@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import redis from "../config/redis.js";
 
 export const getUserByEmail = async (req, res) => {
     try {
@@ -10,10 +11,10 @@ export const getUserByEmail = async (req, res) => {
             });
         }
         res.json(user);
-    } catch (err) {
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: err.message
+            message: error.message
         });
     }
 };
@@ -29,10 +30,10 @@ export const createUser = async (req, res) => {
         }
         const user = await User.create({ name, email, phoneNumber});
         res.status(201).json(user);
-    } catch (err) {
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: err.message
+            message: error.message
         });
     }
 };
@@ -40,13 +41,19 @@ export const createUser = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
+        const cacheKey = `user:${userId}`;
+        const cachedUser = await redis.get(cacheKey);
+        if (cachedUser) {
+            return res.json(JSON.parse(cachedUser));
+        }
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
             });
         }
-        return res.json({
+        const responseData = {
             success: true,
             user: {
                 userId: user._id,
@@ -57,11 +64,13 @@ export const getUserById = async (req, res) => {
                 provider: user.provider,
                 onboardingCompleted: user.onboardingCompleted,
             }
-        });
-    } catch (err) {
+        };
+        await redis.setEx( cacheKey, 3600, JSON.stringify(responseData));
+        return res.json(responseData);
+    } catch (error) {
         return res.status(500).json({
             success: false,
-            message: err.message
+            message: error.message
         });
     }
 };
