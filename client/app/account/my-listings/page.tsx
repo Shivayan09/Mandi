@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProductCard, SectionHeading, Surface } from "@/components/marketplace";
+import { Skeleton } from "@/components/skeleton";
 import { useAppContext } from "@/context/AppContext";
 import { fetchMyListings } from "@/services/listings/api";
 import type { ListingView } from "@/services/listings/types";
@@ -74,7 +75,18 @@ export default function MyListingsPage() {
       </Surface>
 
       {loading ? (
-        <Surface className="p-6 text-sm text-black/70">Loading your listings...</Surface>
+        <Surface className="p-6">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="space-y-4 rounded-3xl border border-black/10 bg-white p-4">
+                <Skeleton className="aspect-[4.5/3.6] w-full rounded-[1.5rem]" />
+                <Skeleton className="h-4 w-24 rounded-full" />
+                <Skeleton className="h-6 w-3/4 rounded-full" />
+                <Skeleton className="h-4 w-20 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </Surface>
       ) : error ? (
         <Surface className="p-6">
           <p className="text-sm font-medium text-red-700">{error}</p>

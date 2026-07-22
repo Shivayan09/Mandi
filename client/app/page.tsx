@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ProductCard, SectionHeading } from "@/components/marketplace";
+import { Skeleton } from "@/components/skeleton";
 import { fetchListings } from "@/services/listings/api";
 import type { ListingView } from "@/services/listings/types";
 
@@ -161,9 +162,7 @@ export default function Home() {
                 </div>
               </Link>
             ) : (
-              <div className="rounded-4xl border border-dashed border-zinc-300 px-6 py-20 text-center text-zinc-500">
-                Loading live listings...
-              </div>
+              <HeroSkeleton />
             )}
           </div>
         </div>
@@ -178,8 +177,10 @@ export default function Home() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {loading ? (
-            <div className="rounded-[1.4rem] border border-dashed border-zinc-300 p-8 text-zinc-500">
-              Loading categories...
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:col-span-2 lg:col-span-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <CategorySkeleton key={index} />
+              ))}
             </div>
           ) : categories.length ? (
             categories.map((category) => (
@@ -216,9 +217,11 @@ export default function Home() {
         />
         <div className="mt-8 grid gap-10 md:grid-cols-2 xl:grid-cols-3">
           {loading ? (
-            <div className="rounded-[1.4rem] border border-dashed border-zinc-300 p-8 text-zinc-500">
-              Loading listings...
-            </div>
+            <>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <ListingSkeleton key={index} />
+              ))}
+            </>
           ) : error ? (
             <div className="rounded-[1.4rem] border border-dashed border-red-300 p-8 text-red-700">
               {error}
@@ -251,6 +254,63 @@ export default function Home() {
           </Link>
         </div>
       </section>
+    </div>
+  );
+}
+
+function HeroSkeleton() {
+  return (
+    <div className="relative overflow-hidden rounded-[2.4rem] border border-black/10 bg-white px-6 py-8 md:px-10 md:py-12">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(17,17,17,0.05),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(17,17,17,0.03),transparent_30%)]" />
+      <div className="relative space-y-8">
+        <div className="space-y-4">
+          <Skeleton className="h-3 w-36 rounded-full" />
+          <Skeleton className="h-14 w-11/12 rounded-[1.4rem]" />
+          <Skeleton className="h-14 w-4/5 rounded-[1.4rem]" />
+          <div className="space-y-2 pt-2">
+            <Skeleton className="h-4 w-full rounded-full" />
+            <Skeleton className="h-4 w-10/12 rounded-full" />
+          </div>
+        </div>
+        <div className="rounded-[2rem] border border-black/10 bg-zinc-100 p-4 md:p-6">
+          <Skeleton className="aspect-[5/4.7] w-full rounded-[1.6rem]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CategorySkeleton() {
+  return (
+    <div className="rounded-[1.4rem] border border-black/10 bg-white p-5">
+      <Skeleton className="h-3 w-24 rounded-full" />
+      <Skeleton className="mt-4 h-6 w-40 rounded-full" />
+      <Skeleton className="mt-3 h-4 w-28 rounded-full" />
+      <Skeleton className="mt-6 h-4 w-28 rounded-full" />
+    </div>
+  );
+}
+
+function ListingSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white">
+      <Skeleton className="aspect-[4.5/3.6] w-full rounded-none" />
+      <div className="space-y-4 p-5">
+        <Skeleton className="h-3 w-20 rounded-full" />
+        <div className="flex items-start justify-between gap-4">
+          <Skeleton className="h-6 w-2/3 rounded-full" />
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-4 w-16 rounded-full" />
+          <Skeleton className="h-4 w-12 rounded-full" />
+          <Skeleton className="h-4 w-20 rounded-full" />
+        </div>
+        <div className="flex items-center justify-between border-t border-zinc-200 pt-4">
+          <Skeleton className="h-4 w-20 rounded-full" />
+          <Skeleton className="h-4 w-16 rounded-full" />
+        </div>
+      </div>
     </div>
   );
 }

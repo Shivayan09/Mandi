@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
+import { Skeleton } from "@/components/skeleton";
 import { deleteListing, fetchListing, updateListing } from "@/services/listings/api";
 import { createConversation } from "@/services/chat/api";
 import type { ListingView } from "@/services/listings/types";
@@ -98,10 +99,65 @@ export default function ProductDetailsPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="rounded-4xl border border-black/10 bg-white p-8 text-zinc-500">
-          Loading listing...
+      <div className="mx-auto px-4 pb-16 pt-5 sm:px-6 lg:px-8">
+        <div className="mb-5 space-y-2">
+          <Skeleton className="h-4 w-24 rounded-full" />
+          <Skeleton className="h-4 w-28 rounded-full" />
         </div>
+
+        <section className="grid gap-10 lg:grid-cols-[1fr_1fr]">
+          <div className="space-y-10">
+            <div className="overflow-hidden rounded-[2.4rem] border border-black/10 bg-white">
+              <Skeleton className="h-[30rem] w-full rounded-none" />
+              <div className="space-y-4 border-t border-black/10 bg-white p-6 sm:p-8">
+                <Skeleton className="h-3 w-24 rounded-full" />
+                <Skeleton className="h-10 w-3/4 rounded-full" />
+                <div className="flex items-end justify-between gap-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32 rounded-full" />
+                    <Skeleton className="h-4 w-44 rounded-full" />
+                  </div>
+                  <Skeleton className="h-10 w-24 rounded-full" />
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-4xl border border-black/10 bg-white">
+              <div className="space-y-3 border-b border-black/10 p-6">
+                <Skeleton className="h-3 w-28 rounded-full" />
+                <Skeleton className="h-6 w-48 rounded-full" />
+                <Skeleton className="h-4 w-72 rounded-full" />
+              </div>
+              <Skeleton className="h-80 w-full rounded-none" />
+            </div>
+          </div>
+
+          <aside className="space-y-6">
+            <div className="rounded-4xl border border-black/10 bg-white p-6">
+              <Skeleton className="h-3 w-24 rounded-full" />
+              <Skeleton className="mt-3 h-8 w-40 rounded-full" />
+              <Skeleton className="mt-3 h-4 w-64 rounded-full" />
+              <div className="mt-6 flex gap-3">
+                <Skeleton className="h-12 flex-1 rounded-full" />
+                <Skeleton className="h-12 flex-1 rounded-full" />
+              </div>
+            </div>
+
+            <div className="rounded-4xl border border-black/10 bg-white p-5">
+              <Skeleton className="h-3 w-28 rounded-full" />
+              <Skeleton className="mt-4 h-24 w-full rounded-[1.4rem]" />
+            </div>
+
+            <div className="rounded-4xl border border-black/10 bg-white p-5">
+              <Skeleton className="h-3 w-24 rounded-full" />
+              <div className="mt-4 space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={index} className="h-4 w-full rounded-full" />
+                ))}
+              </div>
+            </div>
+          </aside>
+        </section>
       </div>
     );
   }

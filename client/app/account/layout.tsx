@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Grid2x2, ListChecks, Settings2, UserCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAppContext } from "@/context/AppContext";
+import { Skeleton } from "@/components/skeleton";
 
 const NAV_ITEMS = [
   {
@@ -55,9 +56,35 @@ export default function AccountLayout({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center px-4">
-        <div className="rounded-4xl border border-black/10 bg-white px-6 py-5 text-sm text-black/70 shadow-[0_18px_60px_rgba(17,17,17,0.06)]">
-          Loading account...
+      <div className="h-[calc(100dvh-var(--site-header-height,0px))] overflow-hidden">
+        <div className="grid h-full min-h-0 gap-0 lg:grid-cols-[270px_1fr]">
+          <aside className="flex h-full flex-col overflow-hidden border-r border-black/10 bg-white shadow-[0_18px_60px_rgba(17,17,17,0.05)]">
+            <div className="border-b border-black/10 bg-zinc-100 p-5">
+              <Skeleton className="h-6 w-36 rounded-full" />
+              <Skeleton className="mt-2 h-4 w-48 rounded-full" />
+            </div>
+
+            <div className="mt-4 flex-1 px-4 pb-4 pt-2">
+              <div className="grid gap-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="flex items-center gap-3 rounded-xl border border-white bg-white px-4 py-3">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <div className="min-w-0 flex-1">
+                      <Skeleton className="h-4 w-36 rounded-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <main className="scrollbar-hidden min-h-0 min-w-0 overflow-y-auto px-5 py-3">
+            <div className="space-y-6">
+              <Skeleton className="h-10 w-56 rounded-full" />
+              <Skeleton className="h-40 w-full rounded-[2rem]" />
+              <Skeleton className="h-96 w-full rounded-[2rem]" />
+            </div>
+          </main>
         </div>
       </div>
     );

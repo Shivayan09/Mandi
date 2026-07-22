@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Pencil } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { Skeleton } from "@/components/skeleton";
 import type { ListingView } from "@/services/listings/types";
 
 export function SiteHeader() {
@@ -16,7 +17,10 @@ export function SiteHeader() {
   const isMessagesActive = pathname?.startsWith("/messages");
   const isAccountActive = pathname?.startsWith("/account");
   const accountNav = loading ? (
-    <span className="rounded-full px-4 py-2 text-black/35">Account</span>
+    <span className="inline-flex items-center gap-2 rounded-full px-4 py-2">
+      <Skeleton className="h-4 w-4" />
+      <Skeleton className="h-4 w-20 rounded-full" />
+    </span>
   ) : user ? (
     <NavLink href="/account" active={isAccountActive}>Account</NavLink>
   ) : null;

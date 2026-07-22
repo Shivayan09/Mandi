@@ -1,14 +1,16 @@
 "use client";
 
-import { ChevronDown, Search, Send, MoreVertical, MoreHorizontal } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Search, Send, MoreHorizontal } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppContext } from "@/context/AppContext";
+import { Skeleton } from "@/components/skeleton";
 import socket from "@/lib/socket";
 import { deleteMessage as deleteMessageRequest, fetchConversations, fetchMessages, type Conversation, type Message } from "@/services/chat/api";
 import { useRouter } from "next/navigation";
 
-export default function MessagesPage() {
+function MessagesContent() {
   const searchParams = useSearchParams();
   const conversationIdFromQuery = searchParams.get("conversationId");
   const { user } = useAppContext();
@@ -245,17 +247,7 @@ export default function MessagesPage() {
 
           <div className="scrollbar-hidden flex-1 overflow-y-auto p-4">
             {loadingConversations ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="animate-pulse rounded-[1.4rem] border border-dashed border-zinc-200 bg-zinc-50 p-4"
-                  >
-                    <div className="h-4 w-2/3 rounded-full bg-zinc-200" />
-                    <div className="mt-3 h-3 w-1/2 rounded-full bg-zinc-200" />
-                  </div>
-                ))}
-              </div>
+              <ConversationListSkeleton />
             ) : conversations.length > 0 ? (
               <div className="space-y-3">
                 {conversations.map((conversation) => {
@@ -317,11 +309,7 @@ export default function MessagesPage() {
           <div className="scrollbar-hidden flex-1 min-h-0 overflow-y-auto px-5 py-6 sm:px-8">
             {selectedConversationId ? (
               loadingMessages ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-14 w-3/4 animate-pulse rounded-3xl bg-zinc-100" />
-                  ))}
-                </div>
+                <MessageThreadSkeleton />
               ) : messages.length > 0 ? (
                 <div className="space-y-4">
                   {messages.map((message, index) => {
@@ -361,7 +349,7 @@ export default function MessagesPage() {
 
                                 {openMessageMenuId === message._id ? (
                                   <div
-                                  ref={menuRef}
+                                    ref={menuRef}
                                     className="absolute right-2 top-11 z-20 min-w-36 overflow-hidden rounded-2xl border border-black/10 bg-white text-black shadow-[0_16px_40px_rgba(0,0,0,0.12)]"
                                     onClick={(event) => event.stopPropagation()}
                                   >
@@ -462,5 +450,86 @@ export default function MessagesPage() {
           </div>
         </div>
       )
+  );
+}
+
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<MessagesPageSkeleton />}>
+      <MessagesContent />
+    </Suspense>
+  );
+}
+
+function MessagesPageSkeleton() {
+  return (
+    <div className="mx-auto h-[calc(100dvh-10rem)] min-h-145">
+      <div className="grid h-full min-h-0 lg:grid-cols-[320px_1fr]">
+        <aside className="hidden min-h-0 flex-col overflow-hidden border border-black/10 bg-white shadow-[0_20px_70px_rgba(17,17,17,0.06)] lg:flex">
+          <div className="border-b border-black/10 p-4">
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+          <div className="space-y-3 p-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-zinc-50 p-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3 rounded-full" />
+                  <Skeleton className="h-3 w-1/2 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        <main className="flex min-h-0 flex-col overflow-hidden border border-black/10 bg-white shadow-[0_20px_70px_rgba(17,17,17,0.06)]">
+          <div className="flex items-center justify-between border-b border-black/10 px-5 py-5">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-28 rounded-full" />
+              <Skeleton className="h-6 w-40 rounded-full" />
+            </div>
+            <Skeleton className="h-7 w-20 rounded-full" />
+          </div>
+          <div className="flex-1 px-5 py-6 sm:px-8">
+            <MessageThreadSkeleton />
+          </div>
+          <div className="border-t border-black/10 p-4">
+            <Skeleton className="h-12 w-full rounded-2xl" />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function ConversationListSkeleton() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-zinc-50 p-3">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-4 w-2/3 rounded-full" />
+            <Skeleton className="h-3 w-1/2 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MessageThreadSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className={`flex ${index % 2 === 0 ? "justify-end" : "justify-start"}`}>
+          <div className={`max-w-[75%] space-y-2 rounded-2xl px-4 py-3 ${index % 2 === 0 ? "bg-black/5" : "bg-zinc-100"}`}>
+            <Skeleton className="h-4 w-64 rounded-full" />
+            <Skeleton className="h-4 w-36 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

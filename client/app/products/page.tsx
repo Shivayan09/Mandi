@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen, BriefcaseBusiness, CarFront, ChevronLeft, ChevronRight, Ellipsis, House, Laptop, LayoutGrid, Menu, Shirt, Search, Sofa, Trophy, type LucideIcon, Wrench } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { ProductCard } from "@/components/marketplace";
+import { Skeleton } from "@/components/skeleton";
 import { fetchListings } from "@/services/listings/api";
 import type { ListingView } from "@/services/listings/types";
 
@@ -30,7 +31,7 @@ const FIXED_CATEGORIES: CategorySummary[] = [
   { label: "Others", slug: "others", count: 0, icon: Ellipsis },
 ];
 
-export default function ProductsPage() {
+function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim().toLowerCase() ?? "";
@@ -254,8 +255,10 @@ export default function ProductsPage() {
 
             <div className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto pr-1 pb-4">
               {loading ? (
-                <div className="rounded-xl border border-dashed border-zinc-300 py-20 text-center text-zinc-500">
-                  Loading live listings...
+                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <ProductTileSkeleton key={index} />
+                  ))}
                 </div>
               ) : error ? (
                 <div className="rounded-xl border border-dashed border-red-300 py-20 text-center">
@@ -288,6 +291,76 @@ export default function ProductsPage() {
           </main>
         </div>
       </section>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsPageSkeleton />}>
+      <ProductsContent />
+    </Suspense>
+  );
+}
+
+function ProductsPageSkeleton() {
+  return (
+    <div className="mx-auto flex h-[calc(100dvh-1rem)] flex-col overflow-hidden px-4">
+      <div className="grid min-h-0 flex-1 gap-0 md:grid-cols-[auto_1fr]">
+        <aside className="hidden min-h-0 w-60 flex-col overflow-hidden border-r border-zinc-200 bg-zinc-50 md:flex">
+          <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-16 rounded-full" />
+              <Skeleton className="h-5 w-28 rounded-full" />
+            </div>
+            <Skeleton className="h-10 w-10 rounded-full" />
+          </div>
+          <div className="space-y-3 p-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-3 rounded-xl border border-white bg-white px-4 py-2">
+                <Skeleton className="h-9 w-9 rounded-xl" />
+                <Skeleton className="h-4 w-32 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        <main className="flex min-h-0 flex-col bg-white px-5 py-4">
+          <div className="mb-5 flex items-center gap-4 border-b border-zinc-200 pb-4">
+            <Skeleton className="h-12 flex-1 rounded-xl" />
+            <Skeleton className="h-12 w-32 rounded-xl" />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <ProductTileSkeleton key={index} />
+            ))}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function ProductTileSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white">
+      <Skeleton className="aspect-[4.5/3.6] w-full rounded-none" />
+      <div className="space-y-4 p-5">
+        <Skeleton className="h-3 w-20 rounded-full" />
+        <div className="flex items-start justify-between gap-4">
+          <Skeleton className="h-6 w-2/3 rounded-full" />
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-4 w-16 rounded-full" />
+          <Skeleton className="h-4 w-12 rounded-full" />
+          <Skeleton className="h-4 w-20 rounded-full" />
+        </div>
+        <div className="flex items-center justify-between border-t border-zinc-200 pt-4">
+          <Skeleton className="h-4 w-20 rounded-full" />
+          <Skeleton className="h-4 w-16 rounded-full" />
+        </div>
+      </div>
     </div>
   );
 }
