@@ -118,3 +118,48 @@ export const getMessages = async (req, res) => {
         });
     }
 };
+
+export const deleteMessage = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { messageId } = req.params;
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return res.status(404).json({
+                success: false,
+                message: "Message not found",
+            });
+        }
+        if (String(message.sender) !== String(userId)) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+        const conversationId = message.conversation;
+        await Message.findByIdAndDelete(messageId);
+        const conversation = await Conversation.findById(conversationId);
+        if (conversation && conversation.lastMessage && String(conversation.lastMessage) === String(messageId)) {
+            const latestMessage = await Message.findOne({conversation: conversationId}).sort({ createdAt: -1 });
+            conversation.lastMessage = latestMessage ? latestMessage._id : null;
+            await conversation.save();
+        }
+        const io = getIO();
+        if (io) {
+            io.to(`conversation:${conversationId}`).emit("message:deleted", {
+                messageId,
+                conversationId,
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Message deleted successfully",
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};

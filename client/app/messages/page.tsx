@@ -1,11 +1,11 @@
 "use client";
 
-import { Search, Send } from "lucide-react";
+import { ChevronDown, Search, Send, MoreVertical, MoreHorizontal } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import socket from "@/lib/socket";
-import { fetchConversations, fetchMessages, type Conversation, type Message } from "@/services/chat/api";
+import { deleteMessage as deleteMessageRequest, fetchConversations, fetchMessages, type Conversation, type Message } from "@/services/chat/api";
 import { useRouter } from "next/navigation";
 
 export default function MessagesPage() {
@@ -19,12 +19,37 @@ export default function MessagesPage() {
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(null);
   const selectedConversationId = conversationIdFromQuery ?? manualConversationId;
   const selectedConversationIdRef = useRef<string | null>(selectedConversationId);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const getParticipantId = (participant?: { _id?: string; userId?: string } | null) => participant?._id ?? participant?.userId ?? null;
+  const getMessageDateKey = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toDateString();
+  };
+
+  const formatMessageTime = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  };
+
+  const formatDateDivider = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat([], {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  };
 
   useEffect(() => {
     selectedConversationIdRef.current = selectedConversationId;
@@ -98,19 +123,30 @@ export default function MessagesPage() {
         return [...current, message];
       });
     };
+    const handleMessageDeleted = (payload: { messageId?: string; conversationId?: string }) => {
+      if (!payload?.messageId || !payload?.conversationId) return;
+
+      if (payload.conversationId === selectedConversationIdRef.current) {
+        setMessages((current) => current.filter((message) => message._id !== payload.messageId));
+      }
+
+      void fetchConversations().then(setConversations).catch(() => undefined);
+    };
     const refreshConversations = () => {
       void fetchConversations().then((items) => {
-          setConversations(items);
-          if (!selectedConversationIdRef.current && items.length > 0) {
-            setManualConversationId(items[0]._id);
-          }
-        }).catch(() => undefined);
+        setConversations(items);
+        if (!selectedConversationIdRef.current && items.length > 0) {
+          setManualConversationId(items[0]._id);
+        }
+      }).catch(() => undefined);
     };
     socket.on("message:new", handleMessage);
+    socket.on("message:deleted", handleMessageDeleted);
     socket.on("conversation:new", refreshConversations);
     socket.on("conversation:updated", refreshConversations);
     return () => {
       socket.off("message:new", handleMessage);
+      socket.off("message:deleted", handleMessageDeleted);
       socket.off("conversation:new", refreshConversations);
       socket.off("conversation:updated", refreshConversations);
       socket.disconnect();
@@ -119,8 +155,26 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (!selectedConversationId) return;
+
     socket.emit("joinConversation", selectedConversationId);
   }, [selectedConversationId]);
+
+  useEffect(() => {
+    function handlePointerDown(e: PointerEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node)
+      ) {
+        setOpenMessageMenuId(null);
+      }
+    }
+
+    window.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -157,6 +211,20 @@ export default function MessagesPage() {
         setMessageText("");
       },
     );
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!selectedConversationId) return;
+    if (!window.confirm("Delete this message?")) return;
+    setError(null);
+    try {
+      await deleteMessageRequest(messageId);
+      setMessages((current) => current.filter((message) => message._id !== messageId));
+      setOpenMessageMenuId(null);
+      void fetchConversations().then(setConversations).catch(() => undefined);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "Could not delete message");
+    }
   };
 
   return (
@@ -200,7 +268,10 @@ export default function MessagesPage() {
                     <button
                       key={conversation._id}
                       type="button"
-                      onClick={() => setManualConversationId(conversation._id)}
+                      onClick={() => {
+                        setOpenMessageMenuId(null);
+                        setManualConversationId(conversation._id);
+                      }}
                       className={`w-full cursor-pointer rounded-2xl border p-2 text-left transition ${isActive
                         ? "border-black bg-black text-white"
                         : "border-black/10 bg-white hover:border-black/20 hover:bg-black/5"
@@ -253,15 +324,65 @@ export default function MessagesPage() {
                 </div>
               ) : messages.length > 0 ? (
                 <div className="space-y-4">
-                  {messages.map((message) => {
+                  {messages.map((message, index) => {
                     const mine = message.sender === user?.userId;
+                    const currentDateKey = getMessageDateKey(message.createdAt);
+                    const previousDateKey = getMessageDateKey(messages[index - 1]?.createdAt);
+                    const showDateDivider = currentDateKey && currentDateKey !== previousDateKey;
+                    const timeLabel = formatMessageTime(message.createdAt);
+
                     return (
-                      <div key={message._id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-[75%] rounded-3xl px-4 py-3 text-sm leading-6 ${mine ? "bg-black text-white" : "bg-zinc-100 text-zinc-950"
-                            }`}
-                        >
-                          {message.text}
+                      <div key={message._id} className="space-y-4">
+                        {showDateDivider ? (
+                          <div className="flex justify-center py-2">
+                            <span className="rounded-full border border-black/10 bg-white px-4 py-1 text-[0.68rem] font-medium uppercase tracking-[0.22em] text-black/55">
+                              {formatDateDivider(message.createdAt)}
+                            </span>
+                          </div>
+                        ) : null}
+
+                        <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                          <div className={`group relative max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-6 ${mine ? "bg-black text-white" : "bg-zinc-100 text-zinc-950"}`}>
+                            {mine ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setOpenMessageMenuId((current) =>
+                                      current === message._id ? null : message._id,
+                                    );
+                                  }}
+                                  className="absolute right-0 cursor-pointer top-0 inline-flex h-8 w-8 items-center justify-center rounded-full text-white/75 transition hover:bg-white/10 hover:text-white"
+                                  aria-label="Message options"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
+
+                                {openMessageMenuId === message._id ? (
+                                  <div
+                                  ref={menuRef}
+                                    className="absolute right-2 top-11 z-20 min-w-36 overflow-hidden rounded-2xl border border-black/10 bg-white text-black shadow-[0_16px_40px_rgba(0,0,0,0.12)]"
+                                    onClick={(event) => event.stopPropagation()}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => void handleDeleteMessage(message._id)}
+                                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                ) : null}
+                              </>
+                            ) : null}
+
+                            <p className={mine ? "pr-10" : ""}>{message.text}</p>
+
+                            <div className={`flex items-center justify-end gap-2 text-[0.68rem] ${mine ? "text-white/65" : "text-zinc-500"}`}>
+                              <span>{timeLabel}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );

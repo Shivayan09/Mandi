@@ -3,24 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  BookOpen,
-  BriefcaseBusiness,
-  CarFront,
-  ChevronLeft,
-  ChevronRight,
-  Ellipsis,
-  House,
-  Laptop,
-  LayoutGrid,
-  Menu,
-  Shirt,
-  Search,
-  Sofa,
-  Trophy,
-  type LucideIcon,
-  Wrench,
-} from "lucide-react";
+import { BookOpen, BriefcaseBusiness, CarFront, ChevronLeft, ChevronRight, Ellipsis, House, Laptop, LayoutGrid, Menu, Shirt, Search, Sofa, Trophy, type LucideIcon, Wrench } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { ProductCard } from "@/components/marketplace";
 import { fetchListings } from "@/services/listings/api";
@@ -157,7 +140,7 @@ export default function ProductsPage() {
 
       <section className="flex min-h-0 flex-1 flex-col overflow-hidden border border-zinc-200 bg-white shadow-sm">
 
-        <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[auto_1fr]">
+        <div className="grid min-h-0 flex-1 gap-0 md:grid-cols-[auto_1fr]">
           {mobileSidebarOpen ? (
             <button
               type="button"

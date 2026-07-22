@@ -19,10 +19,8 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
-
     const loadListings = async () => {
       setLoading(true);
-
       try {
         const items = await fetchListings();
         if (!active) return;
@@ -50,7 +48,6 @@ export default function Home() {
 
   const categories = useMemo<CategorySummary[]>(() => {
     const map = new Map<string, CategorySummary>();
-
     for (const listing of listings) {
       const current = map.get(listing.categorySlug);
       if (current) {

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { Surface, SectionHeading } from "@/components/marketplace";
 import { useAppContext } from "@/context/AppContext";
-import { logout as logoutRequest } from "@/services/auth/api";
 
 const settingsGroups = [
   {
@@ -25,12 +24,12 @@ const settingsGroups = [
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user } = useAppContext();
+  const { user, logout } = useAppContext();
 
   if (!user) return null;
 
   const handleLogout = async () => {
-    await logoutRequest();
+    await logout();
     router.replace("/auth/login");
     router.refresh();
   };

@@ -66,6 +66,6 @@ export async function logout() {
       method: "POST",
     });
   } catch {
-    // Keep the client state clear even if the request fails.
+    
   }
 }

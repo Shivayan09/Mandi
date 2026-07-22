@@ -94,6 +94,58 @@ export const initializeSocket = (server) => {
                 });
             }
         });
+        socket.on("deleteMessage", async (payload, ack) => {
+            try {
+                const { conversationId, messageId } = payload ?? {};
+                if (!conversationId || !messageId) {
+                    return ack?.({
+                        success: false,
+                        message: "Conversation and message id are required",
+                    });
+                }
+
+                const message = await Message.findById(messageId);
+                if (!message || String(message.conversation) !== String(conversationId)) {
+                    return ack?.({
+                        success: false,
+                        message: "Message not found",
+                    });
+                }
+
+                if (String(message.sender) !== String(socket.user.userId)) {
+                    return ack?.({
+                        success: false,
+                        message: "Unauthorized",
+                    });
+                }
+
+                await Message.findByIdAndDelete(messageId);
+                const conversation = await Conversation.findById(conversationId);
+                if (conversation && conversation.lastMessage && String(conversation.lastMessage) === String(messageId)) {
+                    const latestMessage = await Message.findOne({ conversation: conversationId }).sort({ createdAt: -1 });
+                    conversation.lastMessage = latestMessage ? latestMessage._id : null;
+                    await conversation.save();
+                }
+
+                io.to(conversationId).emit("message:deleted", {
+                    messageId,
+                    conversationId,
+                });
+                io.to(`user:${socket.user.userId}`).emit("message:deleted", {
+                    messageId,
+                    conversationId,
+                });
+
+                ack?.({
+                    success: true,
+                });
+            } catch (error) {
+                ack?.({
+                    success: false,
+                    message: "Could not delete message",
+                });
+            }
+        });
         socket.on("disconnect", (reason) => {
             console.log(`Socket disconnected: ${socket.id}`, reason);
         });

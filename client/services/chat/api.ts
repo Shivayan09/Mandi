@@ -75,4 +75,14 @@ export async function fetchMessages(conversationId: string) {
   return data.messages ?? [];
 }
 
+export async function deleteMessage(messageId: string) {
+  const response = await apiFetch(`/chat/messages/${encodeURIComponent(messageId)}`, {
+    method: "DELETE",
+  });
+  const data = await readEnvelope<Conversation>(response);
+  if (!response.ok) {
+    throw new Error(data.message ?? "Could not delete message");
+  }
+}
+
 export type { Conversation, Message };

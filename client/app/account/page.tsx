@@ -39,24 +39,6 @@ export default function AccountOverviewPage() {
               <InfoPill label="Phone" value={user.phoneNumber || "Not added"} />
             </div>
           </div>
-
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            <StatCard
-              label="Authentication"
-              value={authLabel}
-              detail="How this account signs in today."
-            />
-            <StatCard
-              label="Verification"
-              value={verificationLabel}
-              detail="Whether the email on file is confirmed."
-            />
-            <StatCard
-              label="Onboarding"
-              value={onboardingLabel}
-              detail="Progress for profile completion."
-            />
-          </div>
         </div>
       </Surface>
 
