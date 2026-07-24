@@ -272,7 +272,7 @@ function HeroSkeleton() {
             <Skeleton className="h-4 w-10/12 rounded-full" />
           </div>
         </div>
-        <div className="rounded-[2rem] border border-black/10 bg-zinc-100 p-4 md:p-6">
+        <div className="rounded-4xl border border-black/10 bg-zinc-100 p-4 md:p-6">
           <Skeleton className="aspect-[5/4.7] w-full rounded-[1.6rem]" />
         </div>
       </div>

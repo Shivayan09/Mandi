@@ -79,7 +79,7 @@ export default function MyListingsPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="space-y-4 rounded-3xl border border-black/10 bg-white p-4">
-                <Skeleton className="aspect-[4.5/3.6] w-full rounded-[1.5rem]" />
+                <Skeleton className="aspect-[4.5/3.6] w-full rounded-3xl" />
                 <Skeleton className="h-4 w-24 rounded-full" />
                 <Skeleton className="h-6 w-3/4 rounded-full" />
                 <Skeleton className="h-4 w-20 rounded-full" />

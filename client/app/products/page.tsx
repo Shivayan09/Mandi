@@ -45,10 +45,8 @@ function ProductsContent() {
 
   useEffect(() => {
     let active = true;
-
     const loadListings = async () => {
       setLoading(true);
-
       try {
         const items = await fetchListings();
         if (!active) return;
